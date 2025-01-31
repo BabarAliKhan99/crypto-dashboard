@@ -33,13 +33,13 @@ def fetch_crypto_data():
         st.error(f"Error fetching data: {e}")
         return pd.DataFrame()
 
-# Function to fetch price data for different time periods with proper error handling
+# Function to fetch historical data (only for 1 hour) with proper error handling
 def fetch_historical_data(coin_id, days):
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
     params = {
         "vs_currency": "usd",
         "days": days,
-        "interval": "minute" if days == "1" else "daily"  # Minute interval for 1 day, daily for longer periods
+        "interval": "minute"  # Minute interval for 1 day
     }
     
     try:
@@ -61,7 +61,7 @@ def fetch_historical_data(coin_id, days):
 
 # Streamlit app title
 st.title("📊 Cryptocurrency Dashboard")
-st.write("Track real-time prices and price trends over different time periods.")
+st.write("Track real-time prices and price trends over the last 1 hour.")
 
 # Sidebar for filtering options
 st.sidebar.header("🔍 Filter Options")
@@ -104,7 +104,7 @@ if 'name' in filtered_df.columns and 'current_price' in filtered_df.columns and 
 else:
     st.warning("Some columns are missing. Data may not be fully loaded.")
 
-# Display price trend for each time period directly on the page
+# Display 1 hour price trend directly on the page
 if len(filtered_df) == 1:
     coin_id = filtered_df.iloc[0]['id']
     
@@ -117,55 +117,5 @@ if len(filtered_df) == 1:
     sparkline_data = filtered_df.iloc[0]["sparkline_in_7d"]["price"]
     fig = px.line(x=list(range(len(sparkline_data))), y=sparkline_data, labels={"x": "Minutes", "y": "Price ($)"}, title="Price Trend Over the Last Hour")
     st.plotly_chart(fig)
-    
-    # 24 Hours Trend
-    st.subheader("📊 24 Hours Price Trend")
-    historical_data_24h = fetch_historical_data(coin_id, "1")
-    if historical_data_24h:
-        price_data = historical_data_24h["prices"]
-        x_values = [x[0] for x in price_data]
-        y_values = [x[1] for x in price_data]
-        fig = px.line(x=x_values, y=y_values, labels={"x": "Date", "y": "Price ($)"}, title="Price Trend Over the Last 24 Hours")
-        st.plotly_chart(fig)
-    
-    # 1 Week Trend
-    st.subheader("📊 1 Week Price Trend")
-    historical_data_1w = fetch_historical_data(coin_id, "7")
-    if historical_data_1w:
-        price_data = historical_data_1w["prices"]
-        x_values = [x[0] for x in price_data]
-        y_values = [x[1] for x in price_data]
-        fig = px.line(x=x_values, y=y_values, labels={"x": "Date", "y": "Price ($)"}, title="Price Trend Over the Last 1 Week")
-        st.plotly_chart(fig)
-
-    # 1 Month Trend
-    st.subheader("📊 1 Month Price Trend")
-    historical_data_1m = fetch_historical_data(coin_id, "30")
-    if historical_data_1m:
-        price_data = historical_data_1m["prices"]
-        x_values = [x[0] for x in price_data]
-        y_values = [x[1] for x in price_data]
-        fig = px.line(x=x_values, y=y_values, labels={"x": "Date", "y": "Price ($)"}, title="Price Trend Over the Last 1 Month")
-        st.plotly_chart(fig)
-
-    # 6 Months Trend
-    st.subheader("📊 6 Months Price Trend")
-    historical_data_6m = fetch_historical_data(coin_id, "180")
-    if historical_data_6m:
-        price_data = historical_data_6m["prices"]
-        x_values = [x[0] for x in price_data]
-        y_values = [x[1] for x in price_data]
-        fig = px.line(x=x_values, y=y_values, labels={"x": "Date", "y": "Price ($)"}, title="Price Trend Over the Last 6 Months")
-        st.plotly_chart(fig)
-
-    # 1 Year Trend
-    st.subheader("📊 1 Year Price Trend")
-    historical_data_1y = fetch_historical_data(coin_id, "365")
-    if historical_data_1y:
-        price_data = historical_data_1y["prices"]
-        x_values = [x[0] for x in price_data]
-        y_values = [x[1] for x in price_data]
-        fig = px.line(x=x_values, y=y_values, labels={"x": "Date", "y": "Price ($)"}, title="Price Trend Over the Last 1 Year")
-        st.plotly_chart(fig)
 
 st.success("🔄 Data updates every 10 minutes.")
